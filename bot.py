@@ -31,7 +31,7 @@ tskLst = ['podejdź po salę 6',
 ]
 
 def rand(n):    
-    for x in range(0,n):
+    for x in range(0,n+1):
         nums.append(x)
     shuffle(nums)
     return
