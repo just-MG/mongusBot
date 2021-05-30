@@ -6,6 +6,7 @@ from random import shuffle
 
 #change to be relevant
 botOwnerID = 624635608417173558
+BOT_TOKEN = 0
 
 ev = {}
 miejsca = {}
@@ -247,4 +248,4 @@ async def on_message(message):
             print(f'{message.author} has sent a following message: {message.content}')
     await client.process_commands(message)
 
-client.run("")
+client.run(BOT_TOKEN)
