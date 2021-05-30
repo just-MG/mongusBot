@@ -4,18 +4,21 @@ from discord.ext import commands, tasks
 from discord.ext.commands import bot, Bot
 from random import shuffle
 
-ev = {} #final list chyba
+#change to be relevant
+botOwnerID = 624635608417173558
+
+ev = {}
 miejsca = {}
 pplSh = {}
 nums = []
-BOT_TOKEN = 
+k = 0 
+t = 0
 tskLst = ['podejdź po salę 6',
 'podejdź pod salę 16',
 'zejdź na dół amfiteatru',
 'podejdź pod windę na parterze',
 'podejdź pod windę na pierwszym piętrze',
 'podejdź pod windę na drugim piętrze',
-'podejdź pod salę 110',
 'podejdź pod salę 114',
 'podejdź pod salę 124',
 'podejdź pod salę 214',
@@ -27,7 +30,10 @@ tskLst = ['podejdź po salę 6',
 'podejdź pod swoją szafkę',
 'podejdź do sklepiku',
 'podejdź do pokoju nauczycielskiego',
-'podejdź pod bibliotekę szkolną'
+'podejdź pod bibliotekę szkolną',
+'podejdź pod wejście na boisko na dachu',
+'podejdź pod salę informatyczną',
+'podejdź pod portiernię'
 ]
 
 def rand(n):    
@@ -45,7 +51,7 @@ def start():
         rand(n)
         for i in range(0, n):
             pplSh[i] = ppl[i], nums[i]
-        print("\n","-"*10)
+        print("-"*10)
         for j in range (0, n+1):
             for i in range (0, n - 2):
                 tmp = {}
@@ -57,27 +63,41 @@ def start():
             i = 0
         if(pplSh[n-1][1] > pplSh[0][1]):
             pplSh[n] = pplSh[0]
-        print("\nThe list is ready\n")
-        print("-"*10)
         for i in range(0, n-1):
             ev[pplSh[i][0]] = pplSh[i+1][0], miejsca["miejsce " + str(i+1)+ ":"]
         ev[pplSh[n-1][0]] = pplSh[0][0], miejsca["miejsce " + str(n)+ ":"]
-        print("\nFunction success\n")
+        print("Function success")
         print("-"*10)
         return(ev)
 
-client = commands.Bot(command_prefix="!")
+async def kill(msgAuth):
+    global ev
+    tmp = ev[msgAuth][0]
+    ev[msgAuth] = ev[ev[msgAuth][0]]
+    ev.pop(tmp)
+    print(f"The list has been changed")
+    await tmp.send("Sorry for your loss. Better luck next time!")
+    if(len(ev)>=3):
+        await msgAuth.send(f'Your new target is: {format(ev[msgAuth][0])} w miejscu {format(ev[msgAuth][1])}')
+        print("The killer has been informed about their new target")
+        print("-"*10)
+    return 0
+
+client = commands.Bot(command_prefix="!", case_insensitive=True)
 
 #when the bot is ready,
 @client.event
 async def on_ready():
+    global t
     print("-"*10)
     print('Bot is ready')
     print("-"*10)
     print("Basic info:")
     print(f"Username: {client.user.name}")
     print(f"Id: {client.user.id}")
+    print(f"Number of reloads: {t}")
     print("-"*10)
+    t +=1
     
 @client.command(help = "Start the game with a current list")
 async def stt(ctx):
@@ -93,10 +113,10 @@ async def stt(ctx):
                 await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
                 print(f"A message has been sent to {y}")
         else:
-            await ctx.send("There's a problem:( [pplSh]")
+            await ctx.send("There's a problem:( [people]")
             return
     else:
-        await ctx.send("There's a problem:( [miejsca]")
+        await ctx.send("There's a problem:( [places]")
         return
 
 #on command "ppl",
@@ -106,20 +126,25 @@ async def ppl(ctx):
     ppl = []
     await ctx.message.add_reaction("🥺")
     async with ctx.typing():
-        for x in ctx.message.mentions:
-            #add a user identifier to the list ppl[]
-            ppl.append(x)
-        #send a confirmation
-        for y in range(0,(len(ppl))): #range has to be equal to the length of a list
-            await ctx.send(f'You\'ve been mentioned, {ppl[y]}. ({y+1}/{len(ppl)})')
-        start()
-        if(ev):
-            for y in ev : #range has to be equal to the length of a list
-                await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
-                print(f"A message has been sent to {y}\n")
+        if ctx.message.mentions:
+            for x in ctx.message.mentions:
+                #add a user identifier to the list ppl[]
+                ppl.append(x)
+            #send a confirmation
+            for y in range(0,(len(ppl))): #range has to be equal to the length of a list
+                await ctx.send(f'You\'ve been mentioned, {ppl[y]}. ({y+1}/{len(ppl)})')
+            start()
+            if(ev):
+                for y in ev : #range has to be equal to the length of a list
+                    await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
+                    print(f"A message has been sent to {y}")
+            else:
+                await ctx.send("Too few places")
+            print("-"*10)
         else:
-            await ctx.send("Too few places")
-        print("-"*10)
+            await ctx.send("No arguments given")
+            print("No arguments")
+            print("-"*10)
     return
 
 @client.command(help = "Specify a place for the game; one at a time")
@@ -130,16 +155,17 @@ async def plc(ctx):
         #add places to the dictionary miejsca
         miejsca["miejsce " + str(k + 1)+ ":"] = ctx.message.content[5:] #musi usunąc prefix (komendy)-resolved
         await ctx.message.add_reaction("🤯")
+        print(f'A place has been added by {ctx.message.author}')
+        k = k+1
     #change the k value (number of places and the index for other places)
     await ctx.message.delete()
     await ctx.send(f"Ilosc miejsc: {len(miejsca)}")
-    k = k+1
     return k
 
 #czyszczenie zmiennych
 @client.command(help = "Clear the values")
 async def clear(ctx):
-    if ctx.message.author.id == 624635608417173558:
+    if ctx.message.author.id == botOwnerID:
         global pplSh, ev, miejsca, k, nums
         pplSh = {} #funckja, ludzie w kółku
         ev = {} #final list chyba
@@ -153,7 +179,7 @@ async def clear(ctx):
 
 @client.command(help = "Show current lists")
 async def show(ctx):
-    if ctx.message.author.id == 624635608417173558:
+    if ctx.message.author.id == botOwnerID:
         await ctx.send(f"Ilość miejsc: {len(miejsca)}\nIlość osób: {len(pplSh)}")
         await ctx.message.author.send(f"List of places: {miejsca}")
         await ctx.message.author.send(f"Lis of people: {pplSh}")
@@ -163,7 +189,7 @@ async def show(ctx):
 
 @client.command() #deafult sets (for debugging)
 async def dea(ctx):
-    print(ctx)
+    print(ev)
 
 @tasks.loop(hours=24)
 async def called_once_a_day():
@@ -176,7 +202,7 @@ async def called_once_a_day():
 @called_once_a_day.before_loop
 async def before():
     await client.wait_until_ready()
-    target_time = '12:00:00'
+    target_time = '11:35:00'
     current_epoch = time.time()
     # get string of full time and split it
     time_parts = time.ctime().split(' ')
@@ -193,4 +219,32 @@ async def before():
 
 called_once_a_day.start()
 
-client.run("BOT_TOKEN")
+@client.event
+async def on_message(message):
+    channel = client.get_channel(847221203079921688)
+    if message.guild is None and message.author != client.user:
+        if(message.content == "kill"):
+            if(len(ev) >= 4):
+                print(f"{message.author} has killed {ev[message.author][0]}")
+                print("-"*10)
+                await channel.send(f"It's official: {message.author} has killed {ev[message.author][0]}. You better be careful now!")
+                await kill(message.author)
+                await channel.send(f"Number of people left: {len(ev)}")
+            else:
+                print(f"{message.author} has killed {ev[message.author][0]}")
+                print("-"*10)
+                await channel.send(f"It's official: {message.author} has killed {ev[message.author][0]}. You better be careful now!")
+                await kill(message.author)
+                print(f"End. Winners:")
+                await channel.send(f"It's the end of the game! The only people left are: ")
+                for key in ev:
+                    print(format(key))
+                    await channel.send(format(key))
+            print("-"*10)
+            await message.add_reaction("🏆")
+        else:
+            await channel.send(message.content)
+            print(f'{message.author} has sent a following message: {message.content}')
+    await client.process_commands(message)
+
+client.run("")
