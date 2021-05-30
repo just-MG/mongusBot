@@ -9,6 +9,7 @@ miejsca = {}
 pplSh = {}
 k = 0 #liczba miejsc
 nums = []
+BOT_TOKEN = 
 tskLst = ['podejdź po salę 6',
 'podejdź pod salę 16',
 'zejdź na dół amfiteatru',
@@ -193,4 +194,4 @@ async def before():
 
 called_once_a_day.start()
 
-client.run("ODQ3MjE5NzQ4NDgyNTgwNTEw.YK644A.GEkYpNQsJPXm5KWgzx24gSh3QT4")
+client.run("BOT_TOKEN")
