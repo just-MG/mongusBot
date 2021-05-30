@@ -7,7 +7,6 @@ from random import shuffle
 ev = {} #final list chyba
 miejsca = {}
 pplSh = {}
-k = 0 #liczba miejsc
 nums = []
 BOT_TOKEN = 
 tskLst = ['podejdź po salę 6',
