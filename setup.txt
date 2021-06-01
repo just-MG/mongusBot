@@ -1,2 +1,2 @@
-BOT TOKEN = [bot token here]
-ID = [bot owner's ID here]
+BOT_TOKEN=[bot token here]
+ID=[bot owner's ID here]

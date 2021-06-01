@@ -6,8 +6,8 @@ from random import shuffle
 
 #change the file to be relevant
 fileContent = open("setup.txt")
-BOT_TOKEN = fileContent.readline()[12:]
-botOwnerID = int(fileContent.readline()[5:])
+BOT_TOKEN = fileContent.readline()[10:]
+botOwnerID = int(fileContent.readline()[3:])
 
 ev = {}
 miejsca = {}
