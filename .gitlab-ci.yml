@@ -1,0 +1,9 @@
+image: python:latest
+
+before_script:
+  - python -V
+
+test:
+  script:
+    - python -m py_compile bot.py
+    - echo 'Done.'
