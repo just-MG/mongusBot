@@ -4,9 +4,10 @@ from discord.ext import commands, tasks
 from discord.ext.commands import bot, Bot
 from random import shuffle
 
-#change to be relevant
-botOwnerID = 624635608417173558
-BOT_TOKEN = 0
+#change the file to be relevant
+fileContent = open("setup.txt")
+BOT_TOKEN = fileContent.readline()[12:]
+botOwnerID = int(fileContent.readline()[5:])
 
 ev = {}
 miejsca = {}
@@ -81,7 +82,6 @@ async def kill(msgAuth):
     if(len(ev)>=3):
         await msgAuth.send(f'Your new target is: {format(ev[msgAuth][0])} w miejscu {format(ev[msgAuth][1])}')
         print("The killer has been informed about their new target")
-        print("-"*10)
     return 0
 
 client = commands.Bot(command_prefix="!", case_insensitive=True)
@@ -95,11 +95,12 @@ async def on_ready():
     print("-"*10)
     print("Basic info:")
     print(f"Username: {client.user.name}")
+    print(f"Bot owner's ID: {botOwnerID}")
     print(f"Id: {client.user.id}")
     print(f"Number of reloads: {t}")
     print("-"*10)
     t +=1
-    
+
 @client.command(help = "Start the game with a current list")
 async def stt(ctx):
     await ctx.message.add_reaction("😎")
@@ -107,12 +108,14 @@ async def stt(ctx):
         if(ppl):
             await ctx.send("The game will start with a current setup")
             start()
+            d = 1
             for y in ev : #range has to be equal to the length of a list
             #pers = format(ev[y][0])
             #print(pers.lstrip("1234567890#"))
             #format(ev[y][0]).lstrip("123456789#")
                 await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
-                print(f"A message has been sent to {y}")
+                print(f"A message has been sent to {d}")
+                d += 1
         else:
             await ctx.send("There's a problem:( [people]")
             return
@@ -136,9 +139,11 @@ async def ppl(ctx):
                 await ctx.send(f'You\'ve been mentioned, {ppl[y]}. ({y+1}/{len(ppl)})')
             start()
             if(ev):
+                d = 1
                 for y in ev : #range has to be equal to the length of a list
                     await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
-                    print(f"A message has been sent to {y}")
+                    print(f"A message has been sent to the {d}. person")
+                    d += 1
             else:
                 await ctx.send("Too few places")
             print("-"*10)
@@ -188,13 +193,23 @@ async def show(ctx):
         await ctx.send(f"Ilość miejsc: {len(miejsca)}\nIlość osób: {len(pplSh)}")
     return
 
+@client.command()
+async def purge(message):
+    if message.author.id == botOwnerID:
+        purgeChannel = client.get_channel(848631696718037032)
+        await purgeChannel.purge(limit=1000)
+    else:
+        await message.send("Permissions missing 🤨")
+    return
+'''
 @client.command() #deafult sets (for debugging)
 async def dea(ctx):
     print(ev)
-
+'''
+'''
 @tasks.loop(hours=24)
 async def called_once_a_day():
-    message_channel = client.get_channel(847221203079921688)
+    message_channel = client.get_channel(848631696718037032)
     if(pplSh):
         for x in ev:
             await x.send(f"Your task is: {random.choice(tskLst)}. You have one hour")
@@ -219,12 +234,13 @@ async def before():
     print("Tasks sent")
 
 called_once_a_day.start()
-
+'''
 @client.event
 async def on_message(message):
-    channel = client.get_channel(847221203079921688)
+    channel = client.get_channel(848631696718037032)
+    dump = client.get_channel(848540045732216862)
     if message.guild is None and message.author != client.user:
-        if(message.content == "kill"):
+        if(message.content == "kill" or message.content == "Kill"):
             if(len(ev) >= 4):
                 print(f"{message.author} has killed {ev[message.author][0]}")
                 print("-"*10)
@@ -244,7 +260,7 @@ async def on_message(message):
             print("-"*10)
             await message.add_reaction("🏆")
         else:
-            await channel.send(message.content)
+            await dump.send(f'{message.author} has sent a following message: {message.content}')
             print(f'{message.author} has sent a following message: {message.content}')
     await client.process_commands(message)
 
