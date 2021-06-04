@@ -1,4 +1,4 @@
-import random, discord, asyncio, time
+import random, discord, asyncio, time, datetime
 from asyncio.tasks import wait, sleep
 from discord.ext import commands, tasks
 from discord.ext.commands import bot, Bot
@@ -8,7 +8,7 @@ from random import shuffle
 fileContent = open("setup.txt")
 BOT_TOKEN = fileContent.readline()[10:]
 botOwnerID = int(fileContent.readline()[3:])
-
+#listFil = open("list.txt", "w")
 ev = {}
 miejsca = {}
 pplSh = {}
@@ -71,6 +71,7 @@ def start():
         print("Function success")
         print("-"*10)
         return(ev)
+        
 
 async def kill(msgAuth):
     global ev
@@ -89,7 +90,7 @@ client = commands.Bot(command_prefix="!", case_insensitive=True)
 #when the bot is ready,
 @client.event
 async def on_ready():
-    global t
+    global t, listFil
     print("-"*10)
     print('Bot is ready')
     print("-"*10)
@@ -143,7 +144,10 @@ async def ppl(ctx):
                 for y in ev : #range has to be equal to the length of a list
                     await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
                     print(f"A message has been sent to the {d}. person")
+                    with open("list.txt", "a") as text:
+                        text.write(f"{y} has to kill {format(ev[y][0])} in {format(ev[y][1])}\n")
                     d += 1
+                    
             else:
                 await ctx.send("Too few places")
             print("-"*10)
@@ -161,7 +165,7 @@ async def plc(ctx):
         #add places to the dictionary miejsca
         miejsca["miejsce " + str(k + 1)+ ":"] = ctx.message.content[5:] #musi usunąc prefix (komendy)-resolved
         await ctx.message.add_reaction("🤯")
-        print(f'A place has been added by {ctx.message.author}')
+        print(f'A place has been added by {ctx.message.author} ({len(miejsca)} places in game)')
         k = k+1
     #change the k value (number of places and the index for other places)
     await ctx.message.delete()
@@ -206,8 +210,8 @@ async def purge(message):
 async def dea(ctx):
     print(ev)
 '''
-'''
-@tasks.loop(hours=24)
+
+@tasks.loop(minutes=1)
 async def called_once_a_day():
     message_channel = client.get_channel(848631696718037032)
     if(pplSh):
@@ -223,18 +227,19 @@ async def before():
     # get string of full time and split it
     time_parts = time.ctime().split(' ')
     # replace the time component to your target
-    time_parts[3] = target_time
+    time_parts[4] = target_time
     # convert to epoch
     future_time = time.mktime(time.strptime(' '.join(time_parts)))
     # if not in the future, add a day to make it tomorrow
     diff = future_time - current_epoch
     if diff < 0:
         diff += 86400
+    print("diff = ",diff/3600, "hours.")
     await asyncio.sleep(diff) #if(12:00 > currentHour): 12:00 - currentHour else: 24h -(currentHour - 12:00)
     print("Tasks sent")
 
 called_once_a_day.start()
-'''
+
 @client.event
 async def on_message(message):
     channel = client.get_channel(848631696718037032)
@@ -257,6 +262,8 @@ async def on_message(message):
                 for key in ev:
                     print(format(key))
                     await channel.send(format(key))
+                with open("list.txt", "w") as listT:
+                    listT.write("")
             print("-"*10)
             await message.add_reaction("🏆")
         else:

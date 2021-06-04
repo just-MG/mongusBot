@@ -1,2 +1,2 @@
-BOT_TOKEN=[bot token here]
-ID=[bot owner's ID here]
+BOT_TOKEN=ODQ3MjE5NzQ4NDgyNTgwNTEw.YK644A.oobkvAMuH32vEhadaUKvZWJsr98
+ID=624635608417173558
