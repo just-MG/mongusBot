@@ -1,2 +1,26 @@
 BOT_TOKEN=
 ID=
+GAME_CHANNEL=
+DUMP_CHANNEL=
+TASK_LIST:
+podejdź po salę 6
+podejdź pod salę 16
+zejdź na dół amfiteatru
+podejdź pod windę na parterze
+podejdź pod windę na pierwszym piętrze
+podejdź pod windę na drugim piętrze
+podejdź pod salę 114
+podejdź pod salę 124
+podejdź pod salę 214
+podejdź pod salę 224
+podejdź pod dowolną kostkę
+pójdź na bieżnię
+podejdź pod gabinet pielęgniarki
+podejdź pod szatnię od wf-u
+podejdź pod swoją szafkę
+podejdź do sklepiku
+podejdź do pokoju nauczycielskiego
+podejdź pod bibliotekę szkolną
+podejdź pod wejście na boisko na dachu
+podejdź pod salę informatyczną
+podejdź pod portiernię

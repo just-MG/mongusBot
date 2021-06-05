@@ -8,35 +8,17 @@ from random import shuffle
 fileContent = open("setup.txt")
 BOT_TOKEN = fileContent.readline()[10:]
 botOwnerID = int(fileContent.readline()[3:])
-#listFil = open("list.txt", "w")
+gameChannel = int(fileContent.readline()[13:])
+dumpChannel = int(fileContent.readline()[13:])
+fileContent.readline()
+tskLst = fileContent.read().splitlines()
+print(f"The following tasks are in game: {format(tskLst)}")
 ev = {}
 miejsca = {}
 pplSh = {}
 nums = []
 k = 0 
 t = 0
-tskLst = ['podejdź po salę 6',
-'podejdź pod salę 16',
-'zejdź na dół amfiteatru',
-'podejdź pod windę na parterze',
-'podejdź pod windę na pierwszym piętrze',
-'podejdź pod windę na drugim piętrze',
-'podejdź pod salę 114',
-'podejdź pod salę 124',
-'podejdź pod salę 214',
-'podejdź pod salę 224',
-'podejdź pod dowolną kostkę',
-'pójdź na bieżnię',
-'podejdź pod gabinet pielęgniarki',
-'podejdź pod szatnię od wf-u',
-'podejdź pod swoją szafkę',
-'podejdź do sklepiku',
-'podejdź do pokoju nauczycielskiego',
-'podejdź pod bibliotekę szkolną',
-'podejdź pod wejście na boisko na dachu',
-'podejdź pod salę informatyczną',
-'podejdź pod portiernię'
-]
 
 def rand(n):    
     for x in range(0,n+1):
@@ -90,14 +72,14 @@ client = commands.Bot(command_prefix="!", case_insensitive=True)
 #when the bot is ready,
 @client.event
 async def on_ready():
-    global t, listFil
+    global t
     print("-"*10)
     print('Bot is ready')
     print("-"*10)
     print("Basic info:")
     print(f"Username: {client.user.name}")
     print(f"Bot owner's ID: {botOwnerID}")
-    print(f"Id: {client.user.id}")
+    print(f"Bot's ID: {client.user.id}")
     print(f"Number of reloads: {t}")
     print("-"*10)
     t +=1
@@ -115,7 +97,7 @@ async def stt(ctx):
             #print(pers.lstrip("1234567890#"))
             #format(ev[y][0]).lstrip("123456789#")
                 await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
-                print(f"A message has been sent to {d}")
+                print(f"A message has been sent to the {d}. person")
                 d += 1
         else:
             await ctx.send("There's a problem:( [people]")
@@ -143,11 +125,10 @@ async def ppl(ctx):
                 d = 1
                 for y in ev : #range has to be equal to the length of a list
                     await y.send(f'Musisz zabic osobe: {format(ev[y][0])} w miejscu {format(ev[y][1])}')
-                    print(f"A message has been sent to the {d}. person")
-                    with open("list.txt", "a") as text:
-                        text.write(f"{y} has to kill {format(ev[y][0])} in {format(ev[y][1])}\n")
+                    print(f"A message has been sent to the {d}. person")                   
                     d += 1
-                    
+                with open("list.txt", "w") as text:
+                    text.writelines(format(ev))             
             else:
                 await ctx.send("Too few places")
             print("-"*10)
@@ -163,7 +144,7 @@ async def plc(ctx):
     global k
     if(ctx.message.content.lstrip() != "!plc"):
         #add places to the dictionary miejsca
-        miejsca["miejsce " + str(k + 1)+ ":"] = ctx.message.content[5:] #musi usunąc prefix (komendy)-resolved
+        miejsca["miejsce " + str(k + 1)+ ":"] = ctx.message.content.removeprefix("!plc ")#ctx.message.content[5:] #musi usunąc prefix (komendy)-resolved
         await ctx.message.add_reaction("🤯")
         print(f'A place has been added by {ctx.message.author} ({len(miejsca)} places in game)')
         k = k+1
@@ -184,6 +165,8 @@ async def clear(ctx):
         nums = [] #random numbers
         await ctx.send("Cleared") #confirm
         await ctx.message.add_reaction("😐")
+        with open("list.txt", "w") as listT:
+            listT.write("")
     else:
         await ctx.send("Permissions missing 🤨")
 
@@ -200,7 +183,7 @@ async def show(ctx):
 @client.command()
 async def purge(message):
     if message.author.id == botOwnerID:
-        purgeChannel = client.get_channel(848631696718037032)
+        purgeChannel = client.get_channel(gameChannel)
         await purgeChannel.purge(limit=1000)
     else:
         await message.send("Permissions missing 🤨")
@@ -213,7 +196,7 @@ async def dea(ctx):
 
 @tasks.loop(minutes=1)
 async def called_once_a_day():
-    message_channel = client.get_channel(848631696718037032)
+    message_channel = client.get_channel(gameChannel)
     if(pplSh):
         for x in ev:
             await x.send(f"Your task is: {random.choice(tskLst)}. You have one hour")
@@ -234,16 +217,30 @@ async def before():
     diff = future_time - current_epoch
     if diff < 0:
         diff += 86400
-    print("diff = ",diff/3600, "hours.")
+    print("-"*10)
+    print("Time left for tasks to be sent: ", round(diff/3600,2), "hours.")
     await asyncio.sleep(diff) #if(12:00 > currentHour): 12:00 - currentHour else: 24h -(currentHour - 12:00)
     print("Tasks sent")
 
 called_once_a_day.start()
 
+def scrBrd(name):
+    with open('scoreBoard.txt') as f:
+        kek = f.readlines()
+        for line in kek:
+            if name in line:
+                kek[kek.index(line)] = "I " + line
+                with open('scoreBoard.txt', "w") as g:
+                    g.writelines(kek)
+                return
+        with open('scoreBoard.txt', "a") as g:
+                g.write("I " + name + "\n")
+        return
+
 @client.event
 async def on_message(message):
-    channel = client.get_channel(848631696718037032)
-    dump = client.get_channel(848540045732216862)
+    channel = client.get_channel(gameChannel)
+    dump = client.get_channel(dumpChannel)
     if message.guild is None and message.author != client.user:
         if(message.content == "kill" or message.content == "Kill"):
             if(len(ev) >= 4):
@@ -262,13 +259,16 @@ async def on_message(message):
                 for key in ev:
                     print(format(key))
                     await channel.send(format(key))
+                    scrBrd(format(key))
                 with open("list.txt", "w") as listT:
                     listT.write("")
             print("-"*10)
             await message.add_reaction("🏆")
         else:
             await dump.send(f'{message.author} has sent a following message: {message.content}')
+            print("-"*10)
             print(f'{message.author} has sent a following message: {message.content}')
+            print("-"*10)
     await client.process_commands(message)
 
 client.run(BOT_TOKEN)
