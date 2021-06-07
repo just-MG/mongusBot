@@ -7,3 +7,4 @@ This is my first bot ever written. It is a bot to automate and simplify our real
 - `!show` - shows the current list of places and players to the admin. 
 - `!clear` - admin can clear all the lists that have been initialized.
 - `!purge` - admin can purge a whole channel using the bot.
+huh
